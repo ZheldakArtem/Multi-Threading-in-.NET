@@ -44,7 +44,7 @@ namespace TaskAsync
 				Console.WriteLine("Something was wrong");
 			}
 
-			Console.ReadLine();
+			Console.ReadLine(); 
 		}
 
 		private static async Task<long> CalculateSummAsync(long number)
