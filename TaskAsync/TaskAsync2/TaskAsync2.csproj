@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{315BC6F2-523B-4C77-9E8B-926640E0AA51}</ProjectGuid>
+    <ProjectGuid>{2887621D-2C31-4054-A80A-80A6569840DB}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>TaskAsync3</RootNamespace>
-    <AssemblyName>TaskAsync3</AssemblyName>
+    <RootNamespace>TaskAsync2</RootNamespace>
+    <AssemblyName>TaskAsync2</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -42,7 +42,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Product.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
