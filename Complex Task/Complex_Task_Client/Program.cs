@@ -29,13 +29,11 @@ namespace Complex_Task_Client
 			IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(address), port);
 			string command = string.Empty;
 			Random random = new Random();
-			// Create the token source.
 			CancellationTokenSource cts;
 			Socket socket;
 
 			do
 			{
-				Thread.Sleep(5000); //small delay to server remove deleted connection
 				cts = new CancellationTokenSource();
 				socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 				socket.Connect(ipPoint);
@@ -43,69 +41,10 @@ namespace Complex_Task_Client
 				try
 				{
 					// send message to the server
-					ThreadPool.QueueUserWorkItem((obj) =>
-					{
-						string message = string.Empty;
-						byte[] dataSend;
-						int messageNumber;
-						CancellationToken token = (CancellationToken)obj;
-
-						for (int i = 0; i < random.Next(1, 10); i++)
-						{
-							Thread.Sleep(random.Next(1000, 3000));
-							if (token.IsCancellationRequested)
-							{
-								break;
-							}
-
-							messageNumber = random.Next(0, messages.Count);
-							message = messages[messageNumber];
-							dataSend = Encoding.Unicode.GetBytes(message);
-							socket.Send(dataSend);
-						}
-					}, cts.Token);
+					SendMessageToServer(socket, random, cts);
 
 					// retrieve data from server and print to the console
-					ThreadPool.QueueUserWorkItem((obj) =>
-					{
-						byte[] data = new byte[256];
-						StringBuilder builder = new StringBuilder();
-						int bytes = 0;
-						CancellationToken token = (CancellationToken)obj;
-
-						Console.WriteLine("Waiting messages from other clients");
-						while (true)
-						{
-							try
-							{
-								if (token.IsCancellationRequested)
-								{
-									socket.Send(Encoding.Unicode.GetBytes("Disconnect"));
-									socket.Shutdown(SocketShutdown.Both);
-									socket.Close();
-									break;
-								}
-								if (socket.Available > 0)
-								{
-									do
-									{
-										bytes = socket.Receive(data, data.Length, 0);
-										builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-									}
-									while (socket.Available > 0);
-									if (builder.Length > 0)
-									{
-										Console.WriteLine("Response from the server:\n" + builder.ToString());
-									}
-									builder.Clear();
-								}
-							}
-							catch (Exception)
-							{
-								break;
-							}
-						}
-					}, cts.Token);
+					RetrieveDataFromServer(socket, random, cts);
 				}
 				catch (Exception ex)
 				{
@@ -124,10 +63,80 @@ namespace Complex_Task_Client
 
 			} while (string.Compare(command, "Y", true) != 0);
 
+			socket.Send(Encoding.Unicode.GetBytes("Disconnect"));
 			socket.Shutdown(SocketShutdown.Both);
 			socket.Close();
 
 			Console.Read();
+		}
+
+		private static void RetrieveDataFromServer(Socket socket, Random random, CancellationTokenSource cts)
+		{
+			ThreadPool.QueueUserWorkItem((obj) =>
+			{
+				byte[] data = new byte[256];
+				StringBuilder builder = new StringBuilder();
+				int bytes = 0;
+				CancellationToken token = (CancellationToken)obj;
+
+				Console.WriteLine("Waiting messages from other clients");
+				while (true)
+				{
+					try
+					{
+						if (token.IsCancellationRequested)
+						{
+							socket.Send(Encoding.Unicode.GetBytes("Disconnect"));
+							socket.Shutdown(SocketShutdown.Both);
+							socket.Close();
+							break;
+						}
+						if (socket.Available > 0)
+						{
+							do
+							{
+								bytes = socket.Receive(data, data.Length, 0);
+								builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+							}
+							while (socket.Available > 0);
+							if (builder.Length > 0)
+							{
+								Console.WriteLine("Response from the server:\n" + builder.ToString());
+							}
+							builder.Clear();
+						}
+					}
+					catch (Exception)
+					{
+						break;
+					}
+				}
+			}, cts.Token);
+		}
+
+		private static void SendMessageToServer(Socket socket, Random random, CancellationTokenSource cts)
+		{
+			ThreadPool.QueueUserWorkItem((obj) =>
+			{
+				string message = string.Empty;
+				byte[] dataSend;
+				int messageNumber;
+				CancellationToken token = (CancellationToken)obj;
+
+				for (int i = 0; i < random.Next(1, 10); i++)
+				{
+					Thread.Sleep(random.Next(1000, 3000));
+					if (token.IsCancellationRequested)
+					{
+						break;
+					}
+
+					messageNumber = random.Next(0, messages.Count);
+					message = messages[messageNumber];
+					dataSend = Encoding.Unicode.GetBytes(message);
+					socket.Send(dataSend);
+				}
+			}, cts.Token);
 		}
 	}
 }
