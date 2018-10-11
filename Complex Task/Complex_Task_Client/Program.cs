@@ -95,7 +95,7 @@ namespace Complex_Task_Client
 									while (socket.Available > 0);
 									if (builder.Length > 0)
 									{
-										Console.WriteLine("Responce from the server:\n" + builder.ToString());
+										Console.WriteLine("Response from the server:\n" + builder.ToString());
 									}
 									builder.Clear();
 								}
