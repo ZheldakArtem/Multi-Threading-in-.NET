@@ -10,33 +10,42 @@ namespace TaskMulth5
 	class Program
 	{
 		private static Semaphore semaphore = new Semaphore(1, 1);
-		private static int N = 1000;
+
 		static void Main(string[] args)
 		{
-			Console.WriteLine("Start");
+			int N = 15;
+			NewMethod(N);
 
-			CreateThread(10);
-
-			Console.WriteLine("End");
 			Console.ReadLine();
 		}
 
-		static void CreateThread(int n)
+		public static void NewMethod(int n)
 		{
-			if (n > 0)
-			{
-				semaphore.WaitOne();
+			Console.WriteLine("Start");
+			CreateThread(n);
+		}
 
-				ThreadPool.QueueUserWorkItem((state) => {
-					Console.WriteLine($"Print state {state}");
+		public static void CreateThread(int n)
+		{
+			ThreadPool.QueueUserWorkItem((state) =>
+			   {
+				   Console.WriteLine($"Thread :  {Thread.CurrentThread.ManagedThreadId}");
+				   if (n > 0)
+				   {
+						semaphore.WaitOne();
 
-					int newState = (int)state;
+						Console.WriteLine($"Print state {state}");
 
-					CreateThread(--newState);
-				}, n);
+						int newState = (int)state;
 
-				semaphore.Release();
-			}
+						CreateThread(--newState);
+						semaphore.Release();
+				   }
+				   else
+				   {
+					   Console.WriteLine("End");
+				   }
+			   }, n);
 		}
 	}
 }
